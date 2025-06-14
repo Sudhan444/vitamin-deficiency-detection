@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vitamin Deficiency Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("https://assets.onecompiler.app/43cndnhd8/43d23v788/591b7422-1d9c-4313-82e2-5d39e837225c.jpeg") no-repeat center center;
+            background-size: cover;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        #preview {
+            display: none;
+            max-width: 100%;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        #result {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="mb-4">Vitamin Deficiency Prediction</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" class="form-control" id="fileInput" accept="image/*" required>
+            <img id="preview" class="img-fluid">
+            <button type="submit" class="btn btn-primary mt-3">Predict</button>
+        </form>
+
+        <div id="result" class="alert alert-success mt-3">
+            <h4>Predicted Class:</h4>
+            <p id="predictedClass" class="fw-bold text-warning"></p>
+            <p id="confidenceScore" class="text-info"></p>
+            <div id="details" class="mt-3"></div>
+            <div id="recommendations" class="mt-3"></div>
+        </div>
+    </div>
+
+    <script>
+        // Show image preview
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle form submission and send image for prediction
+        document.getElementById('uploadForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('file', document.getElementById('fileInput').files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                // Display the predicted class with confidence score
+                document.getElementById('predictedClass').innerText = result.predicted_class;
+                document.getElementById('confidenceScore').innerText = `Confidence: ${result.confidence_score}%`;
+                document.getElementById('result').style.display = 'block';
+
+                // Display details (causes, symptoms, treatment)
+                let details = "";
+                if (result.details) {
+                    details = `
+                        <h4>Details:</h4>
+                        <ul>
+                            <li><strong>Causes:</strong> ${result.details.causes}</li>
+                            <li><strong>Symptoms:</strong> ${result.details.symptoms}</li>
+                            <li><strong>Treatment:</strong> ${result.details.treatment}</li>
+                        </ul>`;
+                }
+                document.getElementById('details').innerHTML = details;
+
+                // Display recommendations based on prediction
+                let recommendations = "";
+                if (result.predicted_class === "Vitamin B12 Deficiency Skin") {
+                    recommendations = `
+                        <h4>Recommendations:</h4>
+                        <ul>
+                            <li><strong>Causes:</strong>Poor dietary intake (vegetarian or vegan diet).</li>
+                            <li><strong>Increase Vitamin B12 Intake:</strong> Eat fish, poultry, eggs, dairy, and fortified cereals.</li>
+                            <li><strong>Consider Supplements:</strong> Consult a doctor if needed.</li>
+                            <li><strong>Monitor Symptoms:</strong> Seek medical advice for fatigue, numbness, or pale skin.</li>
+                            <li><strong>Improve Gut Health:</strong> Address digestion issues affecting B12 absorption.</li>
+                            <li><strong>Treatment:</strong>Increase B12 intake through dairy, eggs, and fortified foods.</li>
+                        </ul>`;
+                } else if (result.predicted_class === "Vitamin C Deficiency Nail") {
+                    recommendations = `
+                        <h4>Recommendations:</h4>
+                        <ul>
+                            <li><strong>Causes:</strong>Inadequate intake of fruits and vegetables,Smoking (reduces Vitamin C levels).</li>
+                            <li><strong>Increase Vitamin C Intake:</strong> Eat citrus fruits, bell peppers, and green leafy vegetables.</li>
+                            <li><strong>Stay Hydrated:</strong> Drink plenty of water.</li>
+                            <li><strong>Use Moisturizers:</strong> Apply vitamin C-enriched lotions.</li>
+                            <li><strong>Monitor for Other Signs:</strong> Seek medical help for bleeding gums or slow healing.</li>
+                            <li><strong>Treatment: </strong>Increase citrus fruits, bell peppers, and berries in diet,Use moisturizing creams for nails and skin.</li>
+                        </ul>`;
+                }
+                document.getElementById('recommendations').innerHTML = recommendations;
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to get prediction. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>

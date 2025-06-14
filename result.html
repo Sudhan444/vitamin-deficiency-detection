@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prediction Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script>
+        window.onload = function () {
+            const params = new URLSearchParams(window.location.search);
+            document.getElementById("predictedClass").innerText = params.get("predicted_class");
+            document.getElementById("probabilities").innerText = JSON.parse(params.get("probabilities"));
+        };
+    </script>
+</head>
+<body>
+
+<div class="container text-center mt-5">
+    <h2>Prediction Result</h2>
+    <div class="alert alert-info mt-3">
+        <h4>Predicted Class:</h4>
+        <p id="predictedClass" class="fw-bold"></p>
+    </div>
+    <div class="alert alert-light">
+        <h5>Probabilities:</h5>
+        <pre id="probabilities"></pre>
+    </div>
+    <a href="/" class="btn btn-primary mt-3">Upload Another Image</a>
+</div>
+
+</body>
+</html>
